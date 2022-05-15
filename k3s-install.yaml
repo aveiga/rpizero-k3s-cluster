@@ -1,0 +1,11 @@
+---
+- name: Install k3s control plane
+  hosts: vm
+  roles:
+    - pre-requisites
+    - k3s-install-control-plane
+    
+- name: Install k3s agent nodes
+  hosts: rpizero01 rpizero02 rpizero03
+  roles:
+    - k3s-install-agents

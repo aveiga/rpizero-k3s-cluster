@@ -1,0 +1,4 @@
+---
+- name: Run k3s uninstall script
+  become: true
+  command: /usr/local/bin/k3s-uninstall.sh

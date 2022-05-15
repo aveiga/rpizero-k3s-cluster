@@ -1,0 +1,3 @@
+node-name: {{ inventory_hostname }}
+cluster-init: true
+node-taint: "CriticalAddonsOnly=true:NoExecute"

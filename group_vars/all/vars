@@ -1,0 +1,2 @@
+ansible_become_pass: "{{ vaulted_become_password }}"
+ansible_ssh_user: "{{ vaulted_ssh_user }}"

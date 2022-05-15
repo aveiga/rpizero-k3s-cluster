@@ -1,0 +1,46 @@
+---
+- name: Verify if cgroup memory boot variables patch needs to be applied
+  become: true
+  lineinfile:
+    path: "/boot/cmdline.txt"
+    regexp: ".*cgroup.*"
+    line: ""
+    state: absent
+  check_mode: yes
+  register: patch
+  ignore_errors: true
+  # failed_when: patch is not changed
+
+- name: Check if patch is needed
+  debug:
+    msg: "{{ patch.found != 1 }}"
+
+- name: Patch cgroup memory boot variables
+  become: true
+  lineinfile:
+    path: "/boot/cmdline.txt"
+    backrefs: yes
+    regexp: "^(.*console=tty1.*)$"
+    line: '\1,cgroup_memory=1 cgroup_enable=memory'
+  when: patch.found != 1
+
+- name: Reboot agents
+  become: true
+  reboot:
+    reboot_timeout: 3600
+  when: patch.found != 1
+
+- name: Copy k3s config file
+  become: true
+  template:
+    src: ../templates/config.yaml
+    dest: /etc/rancher/k3s/
+    mode: 0644
+
+- name: Install K3s
+  shell: "curl -fL https://get.k3s.io | sh -s - agent"
+  ignore_errors: true
+  async: 600
+  poll: 5
+  register: wp
+  failed_when: wp.rc not in [0,1]

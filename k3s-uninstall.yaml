@@ -1,0 +1,5 @@
+---
+- name: Install k3s
+  hosts: vm rpizero01 rpizero02 rpizero03
+  roles:
+    - k3s-uninstall

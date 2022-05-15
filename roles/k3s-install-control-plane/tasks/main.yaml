@@ -1,0 +1,44 @@
+---
+- name: Copy k3s config file
+  become: true
+  template:
+    src: ../templates/config.yaml
+    dest: /etc/rancher/k3s/
+    mode: 0644
+
+- name: Install K3s
+  become: true
+  shell: "curl -fL https://get.k3s.io | sh -s - server"
+  ignore_errors: true
+  async: 600
+  poll: 5
+  register: wp
+  failed_when: wp.rc not in [0,1]
+
+- name: Ensure k3s is running
+  become: true
+  ansible.builtin.systemd:
+    state: restarted
+    name: k3s
+
+- name: Get k3s token
+  become: true
+  command: "cat /var/lib/rancher/k3s/server/token"
+  register: token
+
+- name: Print the k3s token
+  debug:
+    msg: "The generated token is {{ token.stdout }}"
+
+- name: Create .kube directory
+  ansible.builtin.file:
+    state: directory
+    path: "/home/{{ ansible_user }}/.kube"
+
+- name: Copy the kubeconfig to the .kube directory
+  become: true
+  ansible.builtin.copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: "/home/{{ ansible_user }}/.kube/config"
+    remote_src: true
+    mode: 0644

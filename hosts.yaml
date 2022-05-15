@@ -1,0 +1,17 @@
+---
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+    vm:
+      ansible_host: 192.168.1.154
+      ansible_user: aveiga
+    rpizero01:
+      ansible_host: rpizero01.local
+      ansible_user: aveiga
+    rpizero02:
+      ansible_host: rpizero02.local
+      ansible_user: aveiga
+    rpizero03:
+      ansible_host: rpizero03.local
+      ansible_user: aveiga

@@ -1,0 +1,43 @@
+---
+- name: Print target control plane CPU Architecture
+  debug:
+    msg: "{{ ansible_architecture }}"
+
+- name: Get K9s
+  ansible.builtin.get_url:
+    url: "https://github.com/derailed/k9s/releases/download/v0.25.18/k9s_Linux_arm64.tar.gz"
+    dest: "/tmp/k9s_Linux_arm64.tar.gz"
+    mode: "0664"
+  when: ansible_architecture == "aarch64"
+
+- name: Create temporary K9s directory
+  ansible.builtin.file:
+    state: directory
+    path: "/tmp/k9s"
+  when: ansible_architecture == "aarch64"
+
+- name: Unpack K9s
+  ansible.builtin.unarchive:
+    src: "/tmp/k9s_Linux_arm64.tar.gz"
+    dest: "/tmp/k9s"
+    remote_src: true
+  when: ansible_architecture == "aarch64"
+
+- name: Install K9s
+  become: true
+  ansible.builtin.copy:
+    src: "/tmp/k9s/k9s"
+    dest: "/usr/bin/k9s"
+    mode: "+x"
+    remote_src: true
+  when: ansible_architecture == "aarch64"
+
+- name: Cleaning Up temporary K9s installation files
+  become: true
+  ansible.builtin.file:
+    path: "/tmp/{{ item }}"
+    state: absent
+  with_items:
+    - "k9s_Linux_arm64.tar.gz"
+    - "k9s"
+  when: ansible_architecture == "aarch64"
